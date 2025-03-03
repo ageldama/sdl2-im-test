@@ -36,7 +36,7 @@ void init()
 void prepare()
 {
     /* Create our window */
-    app.win = SDL_CreateWindow( "Example", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1280, 720, SDL_WINDOW_SHOWN );
+    app.win = SDL_CreateWindow( "Example", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 300, 200, SDL_WINDOW_SHOWN );
 
     /* Make sure creating the window succeeded */
     if (!app.win) {
@@ -52,6 +52,8 @@ void prepare()
         fprintf(stderr, "Error getting surface: %s", SDL_GetError());
         exit(EXIT_FAILURE);
     }
+
+    SDL_StartTextInput();
 }
 
 void redraw()
@@ -72,14 +74,45 @@ int main(int argc, char *argv[])
 
     prepare();
 
-    int pls_exit = 0;
+    SDL_bool done = SDL_FALSE;
+
     SDL_Event event;
-    while (!pls_exit) {
+    while (!done) {
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
             case SDL_QUIT:
-                pls_exit = 1;
+                done = SDL_TRUE;
                 break;
+
+            case SDL_TEXTINPUT:
+              /* Add new text onto the end of our text */
+              /* strcat(text, event.text.text); */
+              fprintf(stdout, "TEXTINPUT: [%s]\n", event.text.text);
+              break;
+
+            case SDL_TEXTEDITING:
+              /*
+                Update the composition text.
+                Update the cursor position.
+                Update the selection length (if any).
+              */
+              /* composition = event.edit.text; */
+              /* cursor = event.edit.start; */
+              /* selection_len = event.edit.length; */
+              fprintf(stdout, "\tTEXTEDITING: [%s] start:%d sel:%d\n", event.edit.text, event.edit.start, event.edit.length);
+              break;
+
+            case SDL_KEYDOWN:
+              switch (event.key.keysym.scancode) {
+              case SDL_SCANCODE_ESCAPE:
+                done = SDL_TRUE;
+                break;
+
+              default:
+                break;
+              }
+              
+              break;
             }
 
             redraw();
